@@ -6,6 +6,7 @@ use App\Filament\Resources\SectionContentResource\Pages;
 use App\Filament\Resources\SectionContentResource\RelationManagers;
 use App\Models\SectionContent;
 use Filament\Forms;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
@@ -19,11 +20,38 @@ class SectionContentResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
 
+    protected static ?string $navigationGroup = 'Courses';
+
+
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
                 //
+                Select::make('course_section_id')
+                ->label('Course Section')
+                ->options(function () {
+                    return \App\Models\CourseSection::with('course')
+                        ->get()
+                        ->mapWithKeys(function ($section) {
+                            return [
+                                $section->id => $section->course
+                                    ? "{$section->course->name} - {$section->name}"
+                                    : $section->name, // Fallback if course is null
+                            ];
+                        })
+                        ->toArray(); // Convert the collection to an array
+                })
+                ->searchable()
+                ->required(),
+
+                Forms\Components\TextInput::make('name')
+                    ->required()
+                    ->maxLength(255),
+
+                Forms\Components\RichEditor::make('content')
+                    ->columnSpanFull()
+                    ->required(),
             ]);
     }
 
@@ -32,6 +60,17 @@ class SectionContentResource extends Resource
         return $table
             ->columns([
                 //
+                Tables\Columns\TextColumn::make('name')
+                ->sortable()
+                    ->searchable(),
+
+                Tables\Columns\TextColumn::make('courseSection.name')
+                    ->sortable()
+                    ->searchable(),
+
+                Tables\Columns\TextColumn::make('courseSection.course.name')
+                    ->sortable()
+                    ->searchable(),
             ])
             ->filters([
                 Tables\Filters\TrashedFilter::make(),

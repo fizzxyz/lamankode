@@ -5,6 +5,7 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\CourseMentorResource\Pages;
 use App\Filament\Resources\CourseMentorResource\RelationManagers;
 use App\Models\CourseMentor;
+use App\Models\User;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -17,13 +18,40 @@ class CourseMentorResource extends Resource
 {
     protected static ?string $model = CourseMentor::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-star';
+    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+
+    protected static ?string $navigationGroup = 'Courses';
+
 
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
                 //
+                Forms\Components\Select::make('course_id')
+                    ->relationship('course', 'name')
+                    ->searchable()
+                    ->preload()
+                    ->required(),
+
+                Forms\Components\Select::make('user_id')
+                    ->label('Mentor')
+                    ->options(function () {
+                        return User::role('mentor')->pluck('name', 'id');
+                    })
+                    ->searchable()
+                    ->preload()
+                    ->required(),
+
+                Forms\Components\Textarea::make('about')
+                    ->required(),
+
+                Forms\Components\Select::make('is_active')
+                    ->options([
+                        true => 'Active',
+                        false => 'Banned',
+                    ])
+                    ->required(),
             ]);
     }
 
@@ -32,6 +60,18 @@ class CourseMentorResource extends Resource
         return $table
             ->columns([
                 //
+                Tables\Columns\ImageColumn::make('mentor.photo'),
+
+                Tables\Columns\TextColumn::make('mentor.name')
+                    ->sortable()
+                    ->searchable(),
+
+                Tables\Columns\ImageColumn::make('course.thumbnail')
+                    ->label('Thumbnail'),
+
+                Tables\Columns\TextColumn::make('course.name')
+                    ->sortable()
+                    ->searchable(),
             ])
             ->filters([
                 Tables\Filters\TrashedFilter::make(),

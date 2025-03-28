@@ -12,21 +12,25 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Fieldset;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Textarea;
+use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Forms\Components\TextInput;
 use Filament\Tables\Columns\ImageColumn;
 use Filament\Forms\Components\FileUpload;
 use Illuminate\Database\Eloquent\Builder;
+use RelationManagers\PostsRelationManager;
 use App\Filament\Resources\CourseResource\Pages;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use App\Filament\Resources\CourseResource\RelationManagers;
-use Filament\Tables\Columns\IconColumn;
+use App\Filament\Resources\CourseResource\RelationManagers\CourseSectionsRelationManager;
 
 class CourseResource extends Resource
 {
     protected static ?string $model = Course::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-academic-cap';
+
+    protected static ?string $navigationGroup = 'Courses';
 
     public static function form(Form $form): Form
     {
@@ -115,7 +119,7 @@ class CourseResource extends Resource
     public static function getRelations(): array
     {
         return [
-            //
+            CourseSectionsRelationManager::class,
         ];
     }
 
